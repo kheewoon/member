@@ -2,6 +2,8 @@ package report.member.entity;
 
 import lombok.*;
 import org.hibernate.annotations.*;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import report.member.dto.MemberDto;
 
 import javax.persistence.*;
@@ -30,7 +32,7 @@ public class MemberEntity extends BaseEntity {
     @Comment("아이디")
     private String memberId;
 
-    @Column(name = "password", nullable = false, length = 14)
+    @Column(name = "password", nullable = false, length = 255)
     @Comment("패스워드")
     private String password;
 
@@ -60,8 +62,14 @@ public class MemberEntity extends BaseEntity {
 
 
     public static MemberEntity entityConvert(MemberDto memberDto){
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         return MemberEntity.builder()
-                .id(memberDto.getId())
+                .memberId(memberDto.getMemberId())
+                .password(passwordEncoder.encode(memberDto.getPassword()))
+                .name(memberDto.getName())
+                .nickName(memberDto.getNickName())
+                .phoneNumber(memberDto.getPhoneNumber())
+                .email(memberDto.getEmail())
                 .build();
     }
 

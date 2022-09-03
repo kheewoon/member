@@ -2,73 +2,78 @@ package report.member.service;
 
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import report.member.common.code.CommonEnum;
+import report.member.common.response.ErrorResponse;
 import report.member.dto.MemberApiDto;
 import report.member.dto.MemberDto;
 import report.member.common.code.MemberEnumCode;
+import report.member.entity.MemberEntity;
 import report.member.exception.MemberException;
 import report.member.repository.MemberQueryRepository;
 import report.member.repository.MemberRepository;
 import report.member.common.response.SucessResponse;
+import report.member.util.SecurityUtil;
 import report.member.vo.MemberVo;
 import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-public class MemberService {
+public class MemberService <T> {
+
+    private final PasswordEncoder passwordEncoder;
 
     private final MemberRepository memberRepository;
 
     private final MemberQueryRepository memberQueryRepository;
 
     /**
-     * 전체 Category 조회
-     *   ㄴ하위 Category 조회
+     * 회원 가입
      */
-    public List<MemberApiDto> categoryList(MemberVo vo) throws MemberException {
+    public T memberSave(MemberDto memberDto) throws MemberException {
 
-        return Arrays.asList(new MemberApiDto());
+        if(duplicationMember(memberDto)){
+            var savedMemberEntity = memberRepository.save(
+                    MemberEntity.entityConvert(memberDto)
+            );
+
+            if(null == savedMemberEntity){
+                return (T) new ErrorResponse(CommonEnum.STATUS_FAIL.getName(), MemberEnumCode.MEMBER_SAVE_FAIL);
+            }
+
+
+            return (T) new SucessResponse(CommonEnum.STATUS_SUCCESS.getName(), MemberEnumCode.MEMBER_SAVE_SUCESS, MemberApiDto.dtoConvert(
+                    savedMemberEntity
+            ));
+        }
+
+        return (T) new ErrorResponse(CommonEnum.STATUS_FAIL.getName(), MemberEnumCode.MEMBER_SAVE_FAIL);
+
     }
 
     /**
-     * 상위 Category 조회
-     *   ㄴ하위 Category 조회
-     */
-    public MemberApiDto find(Long searchCategoryId) throws MemberException {
-
-        return new MemberApiDto();
-    }
-
-    /**
-     * Category 저장
-     */
-    public MemberApiDto saveCategory(MemberDto dto){
-
-        return new MemberApiDto();
-
-        //저장후 데이터 조회후 리턴
-        //return memberQueryRepository.findCategoryOne(memberRepository.save(categoryEntity).getId()).orElseThrow(() -> new MemberException(ErrorCode.CATEGORY_NOT_FOUND));
-    }
-
-    /**
-     * Category 수정
-     */
+     * SecurityContextHolder에서 저장된 memberId로 유저 정보 조회
+     * */
     @Transactional
-    public MemberApiDto modifyCategory(Long id, MemberDto dto){
-
-       return new MemberApiDto();
+    public MemberApiDto findMember(){
+        return MemberApiDto.dtoConvert(
+                SecurityUtil.getCurrentUserId()
+                        .flatMap(memberRepository::findByMemberId)
+                        .orElseThrow(() -> new MemberException(MemberEnumCode.NOT_FOUND_MEMBER)
+                        )
+        );
     }
 
     /**
-     * Category 삭제
-     * 연관관계 매핑되어 있는 자식 Category 일괄 삭제
-     */
+     * 유저 중복 체크를 위한 유저 정보 조회
+     * */
     @Transactional
-    public SucessResponse deleteCategory(Long id){
+    public boolean duplicationMember(MemberDto memberDto){
+        var findMemberEntity = memberRepository.findByMemberId(memberDto.getMemberId());
 
-
-        return new SucessResponse(MemberEnumCode.CATEGORY_DELETE_FAIL.getCode(), MemberEnumCode.CATEGORY_DELETE_FAIL.getMessage());
+        return findMemberEntity.isEmpty();
     }
 
 

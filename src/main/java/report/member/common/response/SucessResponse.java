@@ -6,24 +6,20 @@ import report.member.common.code.MemberEnumCode;
 @Getter
 public class SucessResponse <T>{
 
-    //private final LocalDateTime timestamp = LocalDateTime.now();
-    //private final int status;
-    //private final String error;
     private final String code;
     private final String message;
-    private T result;
+    private T data;
+    private final String status;
 
-    public SucessResponse(MemberEnumCode memberEnumCode, T parameter) {
-        //this.status = errorCode.getStatus().value();
-        //this.error = errorCode.getStatus().name();
+    public SucessResponse(String status, MemberEnumCode memberEnumCode, T parameter) {
+        this.status = status;
         this.code = memberEnumCode.getCode();
         this.message = memberEnumCode.getMessage();
-        this.result = parameter;
+        this.data = parameter;
     }
 
-    public SucessResponse(String code, String message) {
-        //this.status = errorCode.getStatus().value();
-        //this.error = errorCode.getStatus().name();
+    public SucessResponse(String status, String code, String message) {
+        this.status = status;
         this.code = code;
         this.message = message;
     }

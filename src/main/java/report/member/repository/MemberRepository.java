@@ -9,7 +9,6 @@ import java.util.Optional;
 
 @Repository
 public interface MemberRepository extends JpaRepository <MemberEntity, Long> {
-    Optional<MemberEntity> findByIdAndDeleteFlag(Long id, String deleteFlag);
+    Optional<MemberEntity> findByMemberId(String memberId);
 
-    List<MemberEntity> findByDepthAndDeleteFlag(int depth, String deleteFalg);
 }

@@ -76,15 +76,17 @@ class MemberServiceTest {
             Assertions.assertThat(authCode).isEqualTo("722282");
             Assertions.assertThat(sessionAuthCode).isEqualTo(authCode);
 
-            verify(createAuthCode());
         }
 
         @Test
         void 회원등록() {
-
+            MemberEntity savedEntity = null;
             given(memberRepository.save(any(MemberEntity.class))).willReturn(savedMemberEntity);
 
-            var savedEntity = memberRepository.save(paramMemberEntity);
+            //인증코드 검사
+            if(authCodeValid("722282")){
+                savedEntity = memberRepository.save(paramMemberEntity);
+            }
 
             assertNotNull(savedEntity);
             Assertions.assertThat(savedEntity.getMemberId()).isEqualTo(savedMemberEntity.getMemberId());
@@ -92,31 +94,58 @@ class MemberServiceTest {
 
             verify(memberRepository).save(refEq(paramMemberEntity));
         }
+    }
 
-        public boolean authCodeValid(String authCode){
-            if(null == session || authCode.isEmpty()){
-                throw new MemberException(MemberEnumCode.AUTH_CODE_SEND_FAIL);
-            }
-            else{
-                return authCode.equals(session.getAttribute("authCode"));
-            }
+    @Nested
+    @DisplayName("회원정보 조회")
+    class MemberLogin{
+
+        private MemberDto dto;
+        private MemberEntity paramMemberEntity;
+        private MemberEntity findMemberEntity;
+
+
+        @BeforeEach
+        void save_setup(){
+            session = new MockHttpSession();
+            session.setAttribute("authCode", "722282");
+
+            dto = MemberDto.builder().memberId("test1").password("qwer").build();
+
+            findMemberEntity = MemberEntity
+                    .builder()
+                    .id(1L).memberId("test1").email("test1@naver.com").phoneNumber("01073721474").nickName("nick").password("qwer")
+                    .build();
+
         }
 
-        public String createAuthCode(){
-            Random random = new Random(System.currentTimeMillis());
+        @Test
+        void 조회() {
 
-            int range = (int)Math.pow(10,6);
-            int trim = (int)Math.pow(10, 6-1);
-            int result = random.nextInt(range)+trim;
-
-            if(result>range){
-                result = result - trim;
-            }
-
-            return String.valueOf(result);
         }
     }
 
+    public boolean authCodeValid(String authCode){
+        if(null == session || (null == authCode || authCode.isEmpty())){
+            throw new MemberException(MemberEnumCode.AUTH_CODE_SEND_FAIL);
+        }
+        else{
+            return authCode.equals(session.getAttribute("authCode"));
+        }
+    }
 
+    public String createAuthCode(){
+        Random random = new Random(System.currentTimeMillis());
+
+        int range = (int)Math.pow(10,6);
+        int trim = (int)Math.pow(10, 6-1);
+        int result = random.nextInt(range)+trim;
+
+        if(result>range){
+            result = result - trim;
+        }
+
+        return String.valueOf(result);
+    }
 
 }
