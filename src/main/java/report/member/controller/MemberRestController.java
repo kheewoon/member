@@ -14,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import report.member.common.code.CommonEnum;
+import report.member.common.response.ErrorResponse;
 import report.member.dto.MemberDto;
 import report.member.common.code.MemberEnumCode;
 import report.member.dto.TokenDto;
@@ -68,7 +69,25 @@ public class MemberRestController {
     })
     @ApiOperation(value = "유저 정보 조회 API", notes = "<strong>JWT 토큰</strong>을 Authorization 헤더로 입력받아 유저 정보를 조회한다.")
     public ResponseEntity<Object> me(){
-        return new ResponseEntity<>(new SucessResponse(CommonEnum.STATUS_SUCCESS.getName(), MemberEnumCode.FOUND_MEMBER, memberService.findMember()), HttpStatus.OK);
+        return new ResponseEntity<>(new SucessResponse(CommonEnum.STATUS_SUCCESS.getName(), MemberEnumCode.FOUND_MEMBER, memberService.searchMember()), HttpStatus.OK);
+    }
+
+    @PostMapping("/reset-pwd")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "유저 정보 조회 API")
+    })
+    @ApiOperation(value = "유저 정보 조회 API", notes = "<strong>JWT 토큰</strong>을 Authorization 헤더로 입력받아 유저 정보를 조회한다.")
+    public ResponseEntity<Object> resetPwd(@RequestBody MemberDto memberDto){
+
+        if(memberService.resetPassword(memberDto).intValue() > 0){
+            return new ResponseEntity<>(
+                    new SucessResponse(CommonEnum.STATUS_SUCCESS.getName(), MemberEnumCode.RESET_PASSWORD_SUCESS.getCode(), MemberEnumCode.RESET_PASSWORD_SUCESS.getMessage()),
+                    HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(
+                new ErrorResponse(CommonEnum.STATUS_FAIL.getName(), MemberEnumCode.RESET_PASSWORD_FAIL),
+                HttpStatus.OK);
     }
 
 }

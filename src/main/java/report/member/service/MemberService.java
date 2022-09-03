@@ -32,6 +32,7 @@ public class MemberService <T> {
     /**
      * 회원 가입
      */
+    @Transactional
     public T memberSave(MemberDto memberDto) throws MemberException {
 
         if(duplicationMember(memberDto)){
@@ -57,13 +58,28 @@ public class MemberService <T> {
      * SecurityContextHolder에서 저장된 memberId로 유저 정보 조회
      * */
     @Transactional
-    public MemberApiDto findMember(){
+    public MemberApiDto searchMember(){
         return MemberApiDto.dtoConvert(
-                SecurityUtil.getCurrentUserId()
-                        .flatMap(memberRepository::findByMemberId)
-                        .orElseThrow(() -> new MemberException(MemberEnumCode.NOT_FOUND_MEMBER)
-                        )
+                findMember()
         );
+    }
+
+    @Transactional
+    public Long resetPassword(MemberDto memberDto){
+
+        var findMemberEntity = findMember();
+
+        if(passwordEncoder.matches(memberDto.getPassword(), findMemberEntity.getPassword())){
+            return memberQueryRepository.resetPassword(memberDto);
+        }
+        return 0L;
+    }
+
+    public MemberEntity findMember(){
+        return SecurityUtil.getCurrentUserId()
+                .flatMap(memberRepository::findByMemberId)
+                .orElseThrow(() -> new MemberException(MemberEnumCode.NOT_FOUND_MEMBER)
+                );
     }
 
     /**

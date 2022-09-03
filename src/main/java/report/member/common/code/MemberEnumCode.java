@@ -60,7 +60,12 @@ public enum MemberEnumCode {
     /*
      * 200100 : 비밀번호가 재설정 되었습니다.
      */
-    RESET_PASSWORD_SUCESS("200100", "비밀번호가 재설정 되었습니다.");
+    RESET_PASSWORD_SUCESS("200100", "비밀번호가 재설정 되었습니다."),
+
+    /*
+     * 200101 : 비밀번호가 재설정에 실패 하였습니다.
+     */
+    RESET_PASSWORD_FAIL("200101", "비밀번호가 재설정에 실패 하였습니다.");
 
 
     private final String code;

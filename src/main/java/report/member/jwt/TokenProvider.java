@@ -13,10 +13,13 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
+import report.member.common.code.JwtTokenCode;
 
+import javax.servlet.http.HttpServletRequest;
 import java.security.Key;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.stream.Collectors;
 
@@ -66,28 +69,36 @@ public class TokenProvider implements InitializingBean {
                 .parseClaimsJws(token)
                 .getBody();
 
-        Collection<? extends GrantedAuthority> authorities =
+        /*Collection<? extends GrantedAuthority> authorities =
                 Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
                         .map(SimpleGrantedAuthority::new)
-                        .collect(Collectors.toList());
+                        .collect(Collectors.toList());*/
 
-        User principal = new User(claims.getSubject(), "", authorities);
+        User principal = new User(claims.getSubject(), "", Collections.emptyList());
 
-        return new UsernamePasswordAuthenticationToken(principal, token, authorities);
+        return new UsernamePasswordAuthenticationToken(principal, token, Collections.emptyList());
     }
 
-    public boolean validateToken(String token) {
+    public boolean validateToken(HttpServletRequest request, String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             logger.info("잘못된 JWT 서명입니다.");
+            request.setAttribute("exception", JwtTokenCode.UNKNOWN_ERROR.getCode());
+            //throw new JwtException("잘못된 JWT 서명입니다.");
         } catch (ExpiredJwtException e) {
             logger.info("만료된 JWT 토큰입니다.");
+            request.setAttribute("exception", JwtTokenCode.EXPIRED_TOKEN.getCode());
+            //throw new JwtException("만료된 JWT 토큰입니다.");
         } catch (UnsupportedJwtException e) {
             logger.info("지원되지 않는 JWT 토큰입니다.");
+            request.setAttribute("exception", JwtTokenCode.UNSUPPORTED_TOKEN.getCode());
+            //throw new JwtException("지원되지 않는 JWT 토큰입니다.");
         } catch (IllegalArgumentException e) {
             logger.info("JWT 토큰이 잘못되었습니다.");
+            request.setAttribute("exception", JwtTokenCode.WRONG_TOKEN.getCode());
+            //throw new JwtException("JWT 토큰이 잘못되었습니다.");
         }
         return false;
     }

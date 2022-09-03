@@ -21,7 +21,9 @@ import report.member.jwt.TokenProvider;
 public class SecurityConfig {
 
     private final TokenProvider tokenProvider;
+
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+
     private final CorsFilter corsFilter;
 
     @Bean
