@@ -38,6 +38,10 @@ public class SecurityConfig {
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring().antMatchers("/h2-console/**"
+                , "/swagger-ui.html"
+                , "/swagger-ui/**"
+                , "/webjars/**"
+                , "/v3/api-docs"
                 , "/favicon.ico"
                 , "/error");
     }
@@ -53,6 +57,7 @@ public class SecurityConfig {
                 .exceptionHandling()
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint)
 
+
                 // h2-console enable
                 .and()
                 .headers()
@@ -66,8 +71,13 @@ public class SecurityConfig {
 
                 .and()
                 .authorizeRequests()
+
                 .antMatchers("/member/signup").permitAll()
                 .antMatchers("/member/login").permitAll()
+                .antMatchers("/member/reset-pwd").permitAll()
+                .antMatchers("/member/cert/**").permitAll()
+                .antMatchers("/swagger-resources/**").permitAll()
+                .antMatchers("/member/session-invalidate").permitAll()
                 .anyRequest().authenticated()
 
                 .and()

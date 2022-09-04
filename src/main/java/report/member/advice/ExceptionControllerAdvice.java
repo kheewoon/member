@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -20,6 +22,24 @@ import java.nio.file.AccessDeniedException;
 @ControllerAdvice
 @Slf4j
 public class ExceptionControllerAdvice {
+
+    /*@ExceptionHandler({
+            InternalAuthenticationServiceException.class
+    })
+    public ResponseEntity<ErrorResponse> InternalAuthenticationServiceException(final InternalAuthenticationServiceException ex) {
+        log.error("CommonException: {}", ex.getMessage());
+
+        return new ResponseEntity<>(new ErrorResponse(CommonEnum.STATUS_FAIL.getName(), HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage()), HttpStatus.OK);
+    }*/
+
+    @ExceptionHandler({
+            MemberException.class
+    })
+    public ResponseEntity<ErrorResponse> MemberException(final MemberException ex) {
+        log.error("CommonException: {}", ex.getMemberEnumCode().getCode());
+
+        return new ResponseEntity<>(new ErrorResponse(CommonEnum.STATUS_FAIL.getName(), ex.getMemberEnumCode()), HttpStatus.OK);
+    }
 
     // 400
     @ExceptionHandler({

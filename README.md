@@ -1,9 +1,9 @@
-# 카테고리 API : 권희운
+# 회원 관리 API : 권희운
 
-## 사용 기술 스택 : java, spring boot, jpa, QueryDsl, Embedded H2 DB
+## 사용 기술 스택 : java, spring boot, jpa, QueryDsl, Embedded H2 DB, Spring Security, JWT
 
 ## 빌드 방법
-WORK_DIR :  category
+WORK_DIR :  member
 
 jar 파일 빌드 (테스트코드 제외) \
 ./gradlew build -x test
@@ -11,55 +11,92 @@ jar 파일 빌드 (테스트코드 제외) \
 
 ## 서버 구동 방법
 빌드된 jar 파일 실행 \
-java -jar ./build/libs/category-0.0.1-SNAPSHOT.jar 
+java -jar ./build/libs/member-0.0.1-SNAPSHOT.jar 
 
 
-## 단위, 통합테스트
-Controller, Service, Repository 계층별 단위테스트 \
-CategoryIntegrationTest : 통합테스트 
-
-    * 통합테스트는 테스트용 @EnableJpaAuditing configuration이 설정되어 있어 
-    * report.category.CategoryApplication.java -> @EnableJpaAuditing 주석처리후 통합테스트 실행
+## 구현방법
+1.유저 로그인시 SecurityContextHolder에 인증 정보 저장 \
+2.SecurityContextHolder에 담겨있는 인증정보를 토대로 JWT 토큰 생성 \
+3.JWT 토큰을 Authorization 헤더에 실어 API 요청 \
 
 
     
 
 
 ## API 사용 가이드
-### Swagger Ui : localhost:8080/swagger-ui/#/category-rest-controller
+### Swagger Ui : http://localhost:8080/swagger-ui/#/member-rest-controller
 
 ### API Status Code
     /*
-    * 200010 : 카테고리가 정상적으로 조회 되었습니다.
-    */
-
-    /*
-     * 201010 : 카테고리가 정상적으로 등록 되었습니다.
+     * 200010 : 인증번호가 전송 되었습니다.
      */
 
     /*
-     * 201011 : 카테고리가 정상적으로 수정 되었습니다.
+     * 200020 : 인증번호에 실패 하였습니다.
      */
 
     /*
-     * 201050 : 카테고리가 정상적으로 삭제 되었습니다.
+     * 201030 : 인증이 완료 되었습니다.
      */
 
     /*
-     * 201051 : 카테고리 삭제에 실패하였습니다.
+     * 201040 : 인증에 실패 하였습니다.
+     */
+
+    /*
+     * 200050 : 회원정보가 정상적으로 저장 되었습니다.
+     */
+
+    /*
+     * 200060 : 회원정보 저장에 실패 하였습니다.
+     */
+
+    /*
+     * 200070 : 로그인 인증토큰이 발급 되었습니다.
+     */
+
+    /*
+     * 200070 : 로그인 실패
+     */
+
+    /*
+     * 200080 : 회원 정보가 조회 되었습니다.
+     */
+
+    /*
+     * 200090 : 존재하지 않는 회원 정보입니다.
+     */
+
+    /*
+     * 200100 : 비밀번호가 재설정 되었습니다.
+     */
+
+    /*
+     * 200101 : 비밀번호가 재설정에 실패 하였습니다.
+     */
+
+    /*
+     * 200102 : 전화번호 인증후 다시 시도해 주시기 바랍니다.
      */
        
 
-### 전체 카테고리 조회
-GET : http://localhost:8080 
+### 전화번호 인증
+GET : http://localhost:8080/member/cert/{phoneNumber}
 ```c
 body : {}
 ```
 
-### 상위 카테고리 조회
-GET : http://localhost:8080/categorys/{id} 
+### 회원 가입
+GET : http://localhost:8080/member/signup
 ```c
-body : {} 
+body : {
+    "memberId": "gmldns46",
+    "password": "qwer",
+    "name" : "권희운",
+    "nickName": "nickname",
+    "phoneNumber" : "010-7372-1474",
+    "email" : "gmldns46@naver.com"
+} 
 ```
 
 ### 카테고리 저장 (부모객체 미 포함) 
@@ -71,70 +108,35 @@ body : {
 } 
 ```
 
-저장시 depth : 1, orderNo : 현 depth 기준 orderNo 자동 저장
 
-### 카테고리 저장 (부모객체 포함)
-POST : http://localhost:8080/categorys 
+### 로그인(JWT 토큰 발급)
+POST : http://localhost:8080/member/login
 
 ```c
 body : {
-    "categoryNm" : "카테고리1", 
-    "parentCategory" : {
-        "id" : "부모 카테고리 아이디"
-    }
+    "memberId": "gmldns46",
+    "password": "qwer"
 }
 ```
-저장시 depth : 1, orderNo : 현 depth 기준 orderNo 자동 저장
 
 
-### 카테고리 수정 (카테고리 명, 정렬번호)
-PATCH : http://localhost:8080/categorys/{id} 
+### 내정보 조회
+PATCH : http://localhost:8080/member/me
 
 ```c
+Authorization header : Bearer JWT 토큰
+body : {}
+```
+
+
+### 패스워드 재설정
+
+PATCH : http://localhost:8080/member/reset-pwd
+
+```c
+Authorization header : Bearer JWT 토큰
 body : { 
-      "categoryNm" : "카테고리명 수정",
-      "orderNo" : 1
+    "memberId" : "gmldns46",
+    "password" : "변경할 패스워드"
 }
 ```
-
-
-### 카테고리 수정 (카테고리 명, depth)
-
-PATCH : http://localhost:8080/categorys/{id} 
-
-```c
-body : { 
-    "categoryNm" : "카테고리명 수정",
-    "depth" : 1
-}
-```
-
-depth는 1이상 수정 불가 \
-ex) depth를 1이상으로 수정시 어느 카테고리의 부모인지 불명확하기 때문
-depth 1이상 수정시 반환 되는 메시지
-
-```c
-response : { 
-      "code": 400, 
-      "message": "DEPTH는 1-DEPTH로 수정만 가능합니다.", 
-      "result": null 
-} 
-```
-
-
-### 카테고리 수정 (부모 카테고리 포함)
-PATCH : http://localhost:8080/categorys/{id} 
-
-```c
-body : { 
-    "categoryNm" : "부모 카테고리 변경", 
-    "parentCategory" : { 
-        "id" : "부모 카테고리 아이디" 
-    } 
-}
-```
-
-
-### 카테고리 삭제(하위 자식 카테고리 전부 삭제)
-
-DELETE : http://localhost:8080/categorys/{id}

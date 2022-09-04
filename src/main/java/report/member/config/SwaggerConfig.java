@@ -6,16 +6,21 @@ import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiInfo;
+import springfox.documentation.service.ApiKey;
+import springfox.documentation.service.AuthorizationScope;
+import springfox.documentation.service.SecurityReference;
 import springfox.documentation.spi.DocumentationType;
+import springfox.documentation.spi.service.contexts.SecurityContext;
 import springfox.documentation.spring.web.plugins.Docket;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-@EnableSwagger2
+import java.util.Arrays;
+import java.util.List;
+
 @Configuration
 public class SwaggerConfig {
     @Bean
     public Docket api() {
-        return new Docket(DocumentationType.SWAGGER_2)
+        return new Docket(DocumentationType.OAS_30)
                 .select()
                 .apis(RequestHandlerSelectors.any()) // 특정 패키지경로를 API문서화 한다. 1차 필터
                 .paths(PathSelectors.any()) // apis중에서 특정 path조건 API만 문서화 하는 2차 필터
@@ -23,12 +28,18 @@ public class SwaggerConfig {
                 .groupName("API 1.0.0") // group별 명칭을 주어야 한다.
                 .pathMapping("/")
                 .apiInfo(apiInfo())
+                .securityContexts(Arrays.asList(securityContext()))
+                .securitySchemes(Arrays.asList(apiKey()))
                 .useDefaultResponseMessages(false); // 400,404,500 .. 표기를 ui에서 삭제한다.
+    }
+
+    private ApiKey apiKey() {
+        return new ApiKey("Authorization", "Bearer", "header");
     }
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("Category API")
-                .description("Category API 호출 용도.")
+                .title("회원 관리 API")
+                .description("회원 정보 등록, 조회, 로그인등의 기능에 대한 API")
                 .version("1.0.0")
                 .termsOfServiceUrl("")
 //                .contact()
@@ -36,5 +47,23 @@ public class SwaggerConfig {
                 .licenseUrl("")
                 .build()
                 ;
+    }
+
+    //전역 AuthorizationScope를 사용하여 JWT SecurityContext를 구성.
+    private SecurityContext securityContext() {
+        return SecurityContext.builder()
+                .securityReferences(defaultAuth())
+                .build();
+    }
+
+    private List<SecurityReference> defaultAuth() {
+        AuthorizationScope authorizationScope =
+                new AuthorizationScope("global", "accessEverything");
+        AuthorizationScope[] authorizationScopes =
+                new AuthorizationScope[1];
+
+        authorizationScopes[0] = authorizationScope;
+        return Arrays.asList(
+                new SecurityReference("Authorization", authorizationScopes));
     }
 }

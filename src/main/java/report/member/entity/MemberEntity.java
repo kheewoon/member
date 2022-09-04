@@ -7,11 +7,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import report.member.dto.MemberDto;
 
 import javax.persistence.*;
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import java.util.ArrayList;
-import java.util.List;
+
 
 @Entity
 @Table(name = "member")
@@ -54,11 +52,11 @@ public class MemberEntity extends BaseEntity {
 
 
 
-    /*@PrePersist
+    @PrePersist
     public void setField(){
-        this.depth = (this.depth > 0) ? this.depth : 1;
-        this.deleteFlag = (null == this.deleteFlag || this.deleteFlag.isEmpty()) ? "N":this.deleteFlag;
-    }*/
+        //전화번호 하이픈 제거
+        this.phoneNumber = (null != this.phoneNumber && !this.phoneNumber.isEmpty()) ? this.phoneNumber.replaceAll("-",""):"";
+    }
 
 
     public static MemberEntity entityConvert(MemberDto memberDto){
