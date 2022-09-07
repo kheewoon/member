@@ -21,6 +21,9 @@ public class DataLoader {
     private void LoadUsers(){
         phoneNumberAclRepository.saveAll(
                 Arrays.asList(
+                        PhoneNumberAclEntity.builder().phoneNumber("010-7372-1471").build(),
+                        PhoneNumberAclEntity.builder().phoneNumber("010-7372-1472").build(),
+                        PhoneNumberAclEntity.builder().phoneNumber("010-7372-1473").build(),
                         PhoneNumberAclEntity.builder().phoneNumber("010-7372-1474").build(),
                         PhoneNumberAclEntity.builder().phoneNumber("010-4949-5959").build(),
                         PhoneNumberAclEntity.builder().phoneNumber("010-7777-4235").build(),

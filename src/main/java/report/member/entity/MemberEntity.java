@@ -4,6 +4,7 @@ import lombok.*;
 import org.hibernate.annotations.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import report.member.common.HttpSessionUtil;
 import report.member.dto.MemberDto;
 
 import javax.persistence.*;
@@ -66,7 +67,7 @@ public class MemberEntity extends BaseEntity {
                 .password(passwordEncoder.encode(memberDto.getPassword()))
                 .name(memberDto.getName())
                 .nickName(memberDto.getNickName())
-                .phoneNumber(memberDto.getPhoneNumber())
+                .phoneNumber(HttpSessionUtil.getPhoneNumberSession())
                 .email(memberDto.getEmail())
                 .build();
     }

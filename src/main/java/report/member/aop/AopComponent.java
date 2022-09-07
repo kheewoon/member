@@ -31,10 +31,8 @@ public class AopComponent {
         HttpServletRequest request =
                 ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
 
-        if(!HttpSessionUtil.getPhoneNumberCertAtSession(request)){
+        if(!HttpSessionUtil.getPhoneNumberCertAtSession()){
             throw new MemberException(MemberEnumCode.PHONE_NUMBER_CERT_NOT_FOUND);
         }
     }
-
-
 }

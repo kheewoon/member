@@ -8,10 +8,12 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import report.member.common.code.CommonEnum;
 import report.member.common.code.MemberEnumCode;
+import report.member.common.code.SecurityCode;
 import report.member.exception.ErrorException;
 import report.member.exception.MemberException;
 import report.member.common.code.ErrorCode;
@@ -23,14 +25,32 @@ import java.nio.file.AccessDeniedException;
 @Slf4j
 public class ExceptionControllerAdvice {
 
-    /*@ExceptionHandler({
+    @ExceptionHandler({
+            MethodArgumentNotValidException.class
+    })
+    public ResponseEntity<ErrorResponse> MethodArgumentNotValidException(final MethodArgumentNotValidException ex) {
+        log.error("CommonException: {}", ex.getMessage());
+
+        return new ResponseEntity<>(new ErrorResponse(CommonEnum.STATUS_FAIL.getName(), HttpStatus.BAD_REQUEST.value(), ex.getBindingResult().getAllErrors().get(0).getDefaultMessage()), HttpStatus.OK);
+    }
+
+    @ExceptionHandler({
+            BadCredentialsException.class
+    })
+    public ResponseEntity<ErrorResponse> BadCredentialsException(final BadCredentialsException ex) {
+        log.error("CommonException: {}", ex.getMessage());
+
+        return new ResponseEntity<>(new ErrorResponse(CommonEnum.STATUS_FAIL.getName(), HttpStatus.UNAUTHORIZED.value(), SecurityCode.BAD_CREDENTIALS.getMessage()), HttpStatus.OK);
+    }
+
+    @ExceptionHandler({
             InternalAuthenticationServiceException.class
     })
     public ResponseEntity<ErrorResponse> InternalAuthenticationServiceException(final InternalAuthenticationServiceException ex) {
         log.error("CommonException: {}", ex.getMessage());
 
-        return new ResponseEntity<>(new ErrorResponse(CommonEnum.STATUS_FAIL.getName(), HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage()), HttpStatus.OK);
-    }*/
+        return new ResponseEntity<>(new ErrorResponse(CommonEnum.STATUS_FAIL.getName(), HttpStatus.UNAUTHORIZED.value(), SecurityCode.BAD_CREDENTIALS.getMessage()), HttpStatus.OK);
+    }
 
     @ExceptionHandler({
             MemberException.class

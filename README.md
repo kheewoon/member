@@ -15,16 +15,35 @@ java -jar ./build/libs/member-0.0.1-SNAPSHOT.jar
 
 
 ## 구현방법
-1.유저 로그인시 SecurityContextHolder에 인증 정보 저장 \
-2.SecurityContextHolder에 담겨있는 인증정보를 토대로 JWT 토큰 생성 \
-3.JWT 토큰을 Authorization 헤더에 실어 API 요청 \
+1.전화번호 인증후 세션에 전화번호를 담는다.
+2.회원 가입시 세션에서 전화번호 값을 가져와 insert
+3.사용자 로그인, 내정보 조회시 세션에서 전화번호 값을 가져와 참조
+4.유저 로그인시 SecurityContextHolder에 인증 정보 저장 \
+5.SecurityContextHolder에 담겨있는 인증정보를 토대로 JWT 토큰 생성 \
+6.JWT 토큰을 Authorization 헤더에 실어 API 요청 \
+7.회원가입, 비밀번호 재설정시 전화번호 인증완료 여부 확인을 위한 AOP 작성
+8.AopComponent에서 전화번호 인증완료 여부 세션값 체크
 
 
-    
+##인증 가능한 전화번호 목록(어플리케이션 실행시 insert)
+```c
+010-7372-1471,
+010-7372-1472,
+010-7372-1473,
+010-7372-1474,
+010-4949-5959,
+010-7777-4235,
+010-9999-6326,
+010-8888-7326
+```
 
 
 ## API 사용 가이드
 ### Swagger Ui : http://localhost:8080/swagger-ui/#/member-rest-controller
+### Authorization header 로그인방법
+####1.우측 Authorize 버튼클릭
+####2.value값에 "Bearer {JWT 토큰}" 값을 입력후 Authorize 버튼 클릭
+####3.로그인 완료 API의 모든 요청에 Authorization header 값 자동 포함
 
 ### API Status Code
     /*
@@ -124,7 +143,7 @@ body : {
 PATCH : http://localhost:8080/member/me
 
 ```c
-Authorization header : Bearer JWT 토큰
+Authorization header : Bearer {JWT 토큰}
 body : {}
 ```
 
@@ -134,7 +153,7 @@ body : {}
 PATCH : http://localhost:8080/member/reset-pwd
 
 ```c
-Authorization header : Bearer JWT 토큰
+Authorization header : Bearer {JWT 토큰}
 body : { 
     "memberId" : "gmldns46",
     "password" : "변경할 패스워드"

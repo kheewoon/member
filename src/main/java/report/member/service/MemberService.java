@@ -10,6 +10,7 @@ import report.member.common.code.CommonEnum;
 import report.member.dto.MemberApiDto;
 import report.member.dto.MemberDto;
 import report.member.common.code.MemberEnumCode;
+import report.member.dto.MemberContDto;
 import report.member.entity.MemberEntity;
 import report.member.exception.MemberException;
 import report.member.repository.MemberQueryRepository;
@@ -56,23 +57,25 @@ public class MemberService {
     @Transactional
     public CommonResponse memberSave(MemberDto memberDto) throws MemberException {
 
+        //중복 가입 여부 조회
         if(duplicationMember(memberDto)){
             var savedMemberEntity = memberRepository.save(
                     MemberEntity.entityConvert(memberDto)
             );
-
+            
+            //회원정보 저장 실패
             if(null == savedMemberEntity){
                 return new CommonResponse(CommonEnum.STATUS_FAIL.getName(), MemberEnumCode.MEMBER_SAVE_FAIL);
             }
 
-
+            //회원정보 저장 성공
             return new CommonResponse(CommonEnum.STATUS_SUCCESS.getName(), MemberEnumCode.MEMBER_SAVE_SUCESS, MemberApiDto.dtoConvert(
                     savedMemberEntity
             ));
+        }else{
+            //중복가입
+            return new CommonResponse(CommonEnum.STATUS_FAIL.getName(), MemberEnumCode.MEMBER_DUPLICATION);
         }
-
-        return new CommonResponse(CommonEnum.STATUS_FAIL.getName(), MemberEnumCode.MEMBER_SAVE_FAIL);
-
     }
 
     /**
@@ -90,7 +93,7 @@ public class MemberService {
     @Transactional
     public MemberEntity findMember(){
         return SecurityUtil.getCurrentUserId()
-                .flatMap(memberRepository::findByMemberId)
+                .flatMap(userId -> memberRepository.findByMemberIdAndPhoneNumber(userId, HttpSessionUtil.getPhoneNumberSession()))
                 .orElseThrow(() -> new MemberException(MemberEnumCode.NOT_FOUND_MEMBER)
                 );
     }
@@ -99,16 +102,14 @@ public class MemberService {
      * 패스워드 재설정
      */
     @Transactional
-    public Long resetPassword(MemberDto memberDto, HttpServletRequest request){
+    public Long resetPassword(MemberContDto memberContDto){
 
-        var findMemberEntity = memberRepository.findByMemberIdAndPhoneNumber(memberDto.getMemberId(), HttpSessionUtil.getPhoneNumberSession(request)).orElseThrow(() -> new MemberException(MemberEnumCode.NOT_FOUND_MEMBER));
+        //회원 아이디 기반 회원 정보 조회 없을시 exception 처리
+        var findMemberEntity = memberRepository.findByMemberIdAndPhoneNumber(memberContDto.getMemberId(), HttpSessionUtil.getPhoneNumberSession()).orElseThrow(() -> new MemberException(MemberEnumCode.NOT_FOUND_MEMBER));
 
-        /*if(passwordEncoder.matches(memberDto.getPassword(), findMemberEntity.getPassword())){
-            return memberQueryRepository.resetPassword(memberDto);
-        }*/
         //패스워드 암호화
-        memberDto.passwordEncode();
-        return memberQueryRepository.resetPassword(memberDto);
+        memberContDto.passwordEncode();
+        return memberQueryRepository.resetPassword(MemberDto.builder().memberId(findMemberEntity.getMemberId()).password(memberContDto.getPassword()).build());
     }
 
 
@@ -117,7 +118,7 @@ public class MemberService {
      * */
     @Transactional
     public boolean duplicationMember(MemberDto memberDto){
-        var findMemberEntity = memberRepository.findByMemberId(memberDto.getMemberId());
+        var findMemberEntity = memberRepository.findByMemberIdOrPhoneNumber(memberDto.getMemberId(), HttpSessionUtil.getPhoneNumberSession());
 
         return findMemberEntity.isEmpty();
     }

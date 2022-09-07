@@ -6,6 +6,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
+import report.member.common.HttpSessionUtil;
 import report.member.common.code.MemberEnumCode;
 import report.member.entity.MemberEntity;
 import report.member.exception.MemberException;
@@ -21,7 +22,7 @@ public class MemberDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String memberId) throws UsernameNotFoundException {
-        return memberRepository.findByMemberId(memberId)
+        return memberRepository.findByMemberIdAndPhoneNumber(memberId, HttpSessionUtil.getPhoneNumberSession())
                 .map(member -> createUser(memberId, member))
                 .orElseThrow(() -> new MemberException(MemberEnumCode.NOT_FOUND_MEMBER));
     }

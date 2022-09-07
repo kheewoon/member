@@ -22,16 +22,13 @@ public class MemberQueryRepository {
 
     private final JPAQueryFactory queryFactory;
 
+    /*
+    * 회원 비밀번호 수정
+    * */
     public Long resetPassword(MemberDto memberDto) {
         var memberEntity = QMemberEntity.memberEntity;
 
         UpdateClause<JPAUpdateClause> updateBuilder = this.queryFactory.update(memberEntity);
-
-        //카테고리 명 수정
-        /*if (!dto.getCategoryNm().isEmpty()) {
-            updateBuilder.set(categoryEntity.categoryNm, dto.getCategoryNm());
-        }*/
-
 
         return updateBuilder
                 .set(memberEntity.password, memberDto.getPassword())

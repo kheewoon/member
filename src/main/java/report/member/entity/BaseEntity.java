@@ -13,10 +13,16 @@ import java.time.LocalDateTime;
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 public class BaseEntity {
-
+    
+    /*
+    * 생성시간
+    * */
     @CreatedDate
     private LocalDateTime createDate;
-
+    
+    /*
+    * 마지막 수정 시간
+    * */
     @LastModifiedDate
     private LocalDateTime lastModifiedDate;
 }

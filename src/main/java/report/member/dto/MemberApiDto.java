@@ -13,15 +13,29 @@ import java.util.List;
 @NoArgsConstructor
 public class MemberApiDto {
 
-
+    /*
+    * 회원 아이디
+    * */
     private String memberId;
 
+    /*
+    * 이름
+    * */
     private String name;
 
+    /*
+    * 닉네임
+    * */
     private String nickName;
 
+    /*
+    * 전화번호
+    * */
     private String phoneNumber;
 
+    /*
+    * 이메일
+    * */
     private String email;
 
     public static MemberApiDto dtoConvert(MemberEntity memberEntity){
@@ -33,16 +47,4 @@ public class MemberApiDto {
                 .email(memberEntity.getEmail())
                 .build();
     }
-
-    /*@Data
-    @NoArgsConstructor
-    public static class ParentCategoryApiDto{
-        public ParentCategoryApiDto(long id, String categoryNm) {
-            this.id = id;
-            this.categoryNm = categoryNm;
-        }
-
-        private long id;
-        private String categoryNm;
-    }*/
 }

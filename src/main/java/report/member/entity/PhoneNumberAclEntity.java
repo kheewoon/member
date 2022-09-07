@@ -38,11 +38,4 @@ public class PhoneNumberAclEntity extends BaseEntity {
     }
 
 
-    public static PhoneNumberAclEntity entityConvert(MemberDto memberDto){
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        return PhoneNumberAclEntity.builder()
-                .phoneNumber(memberDto.getPhoneNumber())
-                .build();
-    }
-
 }

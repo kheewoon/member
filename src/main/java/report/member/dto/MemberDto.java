@@ -1,14 +1,13 @@
 package report.member.dto;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
-import org.hibernate.annotations.Comment;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import report.member.entity.MemberEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import javax.persistence.Column;
-import javax.persistence.PostPersist;
+
 import javax.persistence.PrePersist;
-import java.util.Objects;
+import javax.validation.constraints.NotBlank;
 
 @Builder
 @Getter
@@ -16,21 +15,44 @@ import java.util.Objects;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MemberDto {
-
-    private Long id;
-
+    
+    /*
+    * 회원아이디
+    * */
+    @ApiModelProperty(example = "gmldns46")
+    @NotBlank(message = "회원아이디는 필수값 입니다.")
     private String memberId;
-
+    
+    /*
+    * 비밀번호
+    * */
+    @ApiModelProperty(example = "qwer")
+    @NotBlank(message = "비밀번호는 필수값 입니다.")
     private String password;
-
+    
+    /*
+    * 이름
+    * */
+    @ApiModelProperty(example = "권희운")
+    @NotBlank(message = "이름은 필수값 입니다.")
     private String name;
 
+    /*
+    * 닉네임
+    * */
+    @ApiModelProperty(example = "닉네임1")
+    @NotBlank(message = "닉네임은 필수값 입니다.")
     private String nickName;
-
-    private String phoneNumber;
-
+    
+    /*
+    * 이메일
+    * */
+    @ApiModelProperty(example = "gmldns46")
+    @NotBlank(message = "이메일은 필수값 입니다.")
     private String email;
 
+
+    //비밀번호 단방향 암호화
     public void passwordEncode(){
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         this.password = (null != this.password && !this.password.isEmpty()) ? passwordEncoder.encode(this.password) : "";
@@ -40,12 +62,11 @@ public class MemberDto {
 
         if(null != memberEntity){
             return MemberDto.builder()
-                    .id(memberEntity.getId())
+                    //.id(memberEntity.getId())
                     .memberId(memberEntity.getMemberId())
                     .password(memberEntity.getPassword())
                     .name(memberEntity.getName())
                     .nickName(memberEntity.getNickName())
-                    .phoneNumber(memberEntity.getPhoneNumber())
                     .email(memberEntity.getEmail())
                     .build();
         }
